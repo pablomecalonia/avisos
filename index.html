@@ -11,6 +11,7 @@
             padding: 20px;
             background-color: #f5f5f5;
             color: #333;
+            overflow-x: hidden;
         }
         
         .announcement-container {
@@ -26,6 +27,14 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             width: 100%;
             box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .announcement.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .announcement.urgent {
@@ -71,7 +80,7 @@
     <div class="datetime" id="datetime"></div>
     
     <div class="announcement-container">
-        <div class="announcement urgent">
+        <div class="announcement urgent visible">
             <h3>URGENTE: Manutenção Elétrica</h3>
             <span class="date">Publicado em: 10/06/2023</span>
             <p>Amanhã (11/06) haverá manutenção elétrica no prédio A entre 8h e 10h. Todos os colaboradores devem desligar seus equipamentos antes de sair hoje.</p>
@@ -94,6 +103,18 @@
             <span class="date">Publicado em: 28/05/2023</span>
             <p>O código de conduta da empresa foi atualizado. Todos os colaboradores devem ler a nova versão disponível no portal corporativo. As principais mudanças incluem novas diretrizes sobre trabalho remoto e políticas de uso de redes sociais.</p>
         </div>
+        
+        <div class="announcement urgent">
+            <h3>LEMBRETE: Entrega de Relatórios</h3>
+            <span class="date">Publicado em: 15/06/2023</span>
+            <p>O prazo para entrega dos relatórios trimestrais termina na próxima sexta-feira (21/06). Todos os gerentes devem enviar seus relatórios para o departamento financeiro até às 18h.</p>
+        </div>
+        
+        <div class="announcement event">
+            <h3>Workshop de Inovação</h3>
+            <span class="date">Publicado em: 12/06/2023</span>
+            <p>Participe do workshop sobre metodologias ágeis e inovação no dia 28/06 das 14h às 18h. Vagas limitadas - inscreva-se pelo portal do colaborador.</p>
+        </div>
     </div>
     
     <script>
@@ -114,6 +135,72 @@
         
         setInterval(updateDateTime, 1000);
         updateDateTime();
+        
+        // Animação de aparecimento dos cards
+        function animateCards() {
+            const cards = document.querySelectorAll('.announcement');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('visible');
+                }, index * 200);
+            });
+        }
+        
+        // Efeito de scroll automático suave
+        function autoScroll() {
+            const scrollHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollDownDuration = 15000; // 15 segundos para descer
+            const scrollUpDuration = 30000; // 30 segundos para subir
+            const pauseDuration = 5000; // 5 segundos pausado no topo
+            
+            let startTime = null;
+            
+            function scrollDown(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) / scrollDownDuration;
+                const easeProgress = easeInOutQuad(progress);
+                
+                window.scrollTo(0, easeProgress * scrollHeight);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(scrollDown);
+                } else {
+                    setTimeout(() => {
+                        startTime = null;
+                        requestAnimationFrame(scrollUp);
+                    }, pauseDuration);
+                }
+            }
+            
+            function scrollUp(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) / scrollUpDuration;
+                const easeProgress = easeInOutQuad(progress);
+                
+                window.scrollTo(0, scrollHeight - (easeProgress * scrollHeight));
+                
+                if (progress < 1) {
+                    requestAnimationFrame(scrollUp);
+                } else {
+                    setTimeout(() => {
+                        startTime = null;
+                        requestAnimationFrame(scrollDown);
+                    }, pauseDuration);
+                }
+            }
+            
+            function easeInOutQuad(t) {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            }
+            
+            requestAnimationFrame(scrollDown);
+        }
+        
+        // Inicia quando a página carrega
+        window.onload = function() {
+            animateCards();
+            setTimeout(autoScroll, 1000); // Começa o scroll após 1 segundo
+        };
     </script>
 </body>
 </html>
